@@ -9,7 +9,7 @@
  * ScriptDeployment customdeploy_co_certificado_reten_ss
  */
 
-define(['N/translation', 'N/ui/serverWidget', 'N/format', 'N/record', 'N/redirect','N/ui/message','../co.common/co_license_checker'],
+define(['N/translation', 'N/ui/serverWidget', 'N/format', 'N/record', 'N/redirect','N/ui/message','../../../SuiteApps/com.netsuite.lcbfn/co.common/co_license_checker'],
     function ( translation, serverWidget, format, record, redirect,message,licenseChecker) {
 
         // TIPO_RETENCION_IVA = 1;

@@ -7,12 +7,12 @@ define(['N/search', 'N/record', 'N/file', 'N/log'], function(search, record, fil
     function onRequest(context) {
         if (context.request.method === 'GET') {
             var recordId = context.request.parameters.recordId;
-            var recordType = context.request.parameters.recordType;
+            log.debug("po_id", recordId)
 
-            if (!recordId || !recordType) {
-                log.debug("Missing recordId or recordType")
+            if (!recordId) {
+                log.debug("Missing recordId")
                 context.response.status = 400;
-                context.response.write(JSON.stringify({ success: false, message: 'Missing recordId or recordType' }));
+                context.response.write(JSON.stringify({ success: false, message: 'Missing recordId' }));
                 return;
             }
 
@@ -22,28 +22,16 @@ define(['N/search', 'N/record', 'N/file', 'N/log'], function(search, record, fil
                 var savedSearch = search.load({
                     id: 'customsearch_get_message_attach' 
                 });
-                // Add filter dynamically (example: filter by transaction number)
-                // savedSearch.filters.push(
-                //     search.createFilter({
-                //         name: 'type',
-                //         join: 'transaction',
-                //         operator: search.Operator.ANYOF,
-                //         values: recordType
-                //     })
-                // );
-                // savedSearch.filters.push(
-                //     search.createFilter({
-                //         name: 'internalid',
-                //         join: 'transaction',
-                //         operator: search.Operator.ANYOF,
-                //         values: recordId
-                //     })
-                // );
-                // log.debug('Filters Added', savedSearch.filters);
-                var result = {
-                    recordId: recordId,
-                    attachments: []
-                };
+                
+                savedSearch.filters.push(
+                    search.createFilter({
+                        name: 'internalid',
+                        join: 'transaction',
+                        operator: search.Operator.ANYOF,
+                        values: recordId
+                    })
+                );
+                log.debug('Filters Added', savedSearch.filters);
                 
                 var results = [];
                 //var pagedData = savedSearch.runPaged({ pageSize: 1000 });
@@ -52,33 +40,23 @@ define(['N/search', 'N/record', 'N/file', 'N/log'], function(search, record, fil
                     end: 10 // adjust this number based on your requirement
                 });
                 log.debug('Search Results', searchResults);
-                // pagedData.pageRanges.forEach(function (pageRange) {
-                //     var page = pagedData.fetch({ index: pageRange.index });
-                //     page.data.forEach(function (result) {
-                //         results.push({
-                //             internalid: result.id,
-                //             tranid: result.getValue({ name: 'tr_number' }),
-                //             author: result.getText({ name: 'author' }),
-                //             subject: result.getValue({ name: 'subject' }),
-                //             attachments: result.getValue({ name: 'attachments' })
-                //         });
-                //     });
-                // });
+                
                 searchResults.forEach(function(result) {
-                    // Extract data from search result
                     results.push({
-                        internalid: result.id,
-                        tranid: result.getValue({ name: 'tr_nu' }),
-                        author: result.getText({ name: 'author' }),
-                        subject: result.getValue({ name: 'subject' }),
-                        attachments: result.getValue({ name: 'attachments' })
+                      internalid: result.id, // This is correct, as result.id works for the record ID.
+                      tranid: result.getValue({ name: 'tranid', join: 'transaction' }),
+                      author: result.getText({ name: 'author' }),
+                      subject: result.getValue({ name: 'subject' }),
+                      attachmentsInternalId: result.getValue({ name: 'internalid', join: 'attachments' }),
+                      attachmentsName: result.getValue({ name: 'name', join: 'attachments' }),
+                      attachmentsUrl: result.getValue({ name: 'url', join: 'attachments' })
                     });
                 });
 
                 
 
                 context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
-                context.response.write(JSON.stringify({ success: true, data: result, results: results }));
+                context.response.write(JSON.stringify({ success: true, transaction_id: recordId, results: results }));
 
             } catch (e) {
                 log.debug('Processing Error', e.message);

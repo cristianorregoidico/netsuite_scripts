@@ -9,7 +9,7 @@
  *
  */
 
-define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', './co_lb_util.js'],
+define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '../../../SuiteApps/com.netsuite.lcbfn/co.withholdigCertificates/co_lb_util.js'],
     function (search, record, format, file, render, runtime, amountToWords) {
 
         /**
@@ -23,7 +23,7 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
          function getInputData() {
             try {
                 var scriptRuntime = runtime.getCurrentScript();
-                var idRecord = scriptRuntime.getParameter({name: 'custscript_co_id_registro_cert_reten'});
+                var idRecord = scriptRuntime.getParameter({name: 'custscript_co_id_registro_cert_reten_t'});
                 var retencionLetras = {1: 'IVA', 2: 'ICA', 3: 'FUENTE', 4: 'RENTA'};
                 var setup = record.load({type: 'customrecord_co_certificado_retencion', id: idRecord});
                 var procesados = []//buscarProcesados(idRecord);
@@ -93,7 +93,7 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
          */
         function reduce(context) {
             var scriptRuntime = runtime.getCurrentScript();
-            var idRecord = scriptRuntime.getParameter({ name: 'custscript_co_id_registro_cert_reten' });
+            var idRecord = scriptRuntime.getParameter({ name: 'custscript_co_id_registro_cert_reten_t' });
             try {
                 var info = context.values;
                 var datosVendor = null;
@@ -163,7 +163,7 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
         function summarize(context) {
             try {
                 var scriptRuntime = runtime.getCurrentScript();
-                var idRecord = scriptRuntime.getParameter({ name: 'custscript_co_id_registro_cert_reten' });
+                var idRecord = scriptRuntime.getParameter({ name: 'custscript_co_id_registro_cert_reten_t' });
                 record.submitFields({ id: idRecord, type: 'customrecord_co_certificado_retencion', values: { 'custrecord_co_certificado_estado': 'Finalizado' } });
                 log.audit({ title: 'Fin', details: 'Metrica usada ' + context.usage });
 
@@ -335,13 +335,13 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
                 //columns.push(search.createColumn({ name: "taxbasis", join: "taxDetail", summary: resumen ? "SUM" : null }));
                 columns.push(search.createColumn({
                     name: "formulanumeric_1",
-                    formula: "CASE WHEN {recordtype} = 'vendorcredit' THEN {taxdetail.taxbasis} * {exchangerate} * -1 ELSE {taxdetail.taxbasis} * {exchangerate} END",
+                    formula: "CASE WHEN {recordtype} = 'vendorcredit' THEN {taxdetail.taxbasis} * -1 ELSE {taxdetail.taxbasis} END",
                     label: "Formula (taxbasis)",
                     summary: resumen ? "SUM" : null
                 }))
                 columns.push(search.createColumn({
                     name: "formulanumeric_2",
-                    formula: "{taxdetail.taxfxamount}* {exchangerate}",
+                    formula: "{taxdetail.taxfxamount}",
                     label: "Formula (taxamount)",
                     summary: resumen ? "SUM" : null
                 }))
@@ -432,10 +432,10 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
                     //info.montoRetencion = resultados[i].getValue({ name: 'taxfxamount', join: 'taxDetail', summary: resumen ? 'SUM' : null });
                     //info.recordType = resultados[i].getValue({ name: 'recordtype', summary: resumen ? 'GROUP' : null })
                     info.montoBase = resultados[i].getValue({ name: "formulanumeric_1",
-                        formula: "CASE WHEN {recordtype} = 'vendorcredit' THEN {taxdetail.taxbasis} * {exchangerate} * -1 ELSE {taxdetail.taxbasis} * {exchangerate} END",
+                        formula: "CASE WHEN {recordtype} = 'vendorcredit' THEN {taxdetail.taxbasis} * -1 ELSE {taxdetail.taxbasis} END",
                         summary: resumen ? "SUM" : null })
                     info.montoRetencion = resultados[i].getValue({ name: "formulanumeric_2",
-                        formula: "{taxdetail.taxfxamount}* {exchangerate}",
+                        formula: "{taxdetail.taxfxamount}",
                         summary: resumen ? "SUM" : null });
                     info.porcentaje = resultados[i].getValue({ name: 'taxrate', join: 'taxDetail', summary: resumen ? 'GROUP' : null });
                     var taxID = resultados[i].getValue({ name: 'taxcode', join: 'taxDetail', summary: resumen ? 'GROUP' : null });
@@ -468,6 +468,8 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
                     info.currencyIni = recSetupCertReten.getValue({ fieldId: 'custrecord_co_iniciales_moneda' });
                     info.expDate = expDate;
                     data.push(info);
+                    log.debug("data CFOD", data)
+                  log.debug("info CFOD", info)
                 }
             } catch (e) {
                 log.error('obtenerObjetoResultados: ', 'error al obtener la información de los certificados ' + e);
@@ -586,7 +588,7 @@ define(['N/search', 'N/record', 'N/format', 'N/file', 'N/render', 'N/runtime', '
                     xml += '    </tr>';
                 }
                 xml += '    <tr>';
-                xml += '        <td style="" align="center">CERTIFICADO DE RETENCIÓN ' + tipoRetencion + '</td>';
+                xml += '        <td style="" align="center">CERTIFICADO DE RETENCIÓN - CFOD ' + tipoRetencion + '</td>';
                 xml += '    </tr>';
                 xml += '    <tr>';
                 xml += '        <td style="" align="center">' + infoSubsidiary.razonSocial + '</td>';

@@ -7,75 +7,63 @@
 define(['N/record', 'N/file', 'N/log', 'N/search'], function(record, file, log, search) {
 
   function afterSubmit(context) {
+    log.debug("Inicializando ejecución")
+    var files = []
+    var PURCHASE_ORDER_TYPE = 'purchaseorder'; // Tipo de transacción para Purchase Order
     var message = context.newRecord;
-    //log.debug("message", message)
-    var mediaItemLoaded = message.getValue('mediaitemloaded');
-    log.debug("mediaItemLoaded", mediaItemLoaded)
+    var messageId = message.getValue({fieldId: 'id'});
+    log.debug("messageId", messageId)
+    
     var mediaItemCount = message.getLineCount({ sublistId: 'mediaitem' });
     log.debug("mediaItemCount", mediaItemCount)
-    var fileId = message.getSublistValue({
-      sublistId: 'mediaitem',
-      fieldId: 'mediaitem',
-      line: 0 // puedes iterar si hay más de uno
-    });
-    log.debug("fileId", fileId)
-    var itemDisplay = message.getSublistValue({
-      sublistId: 'mediaitem',
-      fieldId: 'mediaitem_display',
-      line: 0 // puedes iterar si hay más de uno
-    });
-    log.debug("itemDisplay", itemDisplay)
-    
+    if (mediaItemCount === 0) return; // Si no hay archivos adjuntos, salir
 
     // Obtener la transacción relacionada (ej: PO)
     var transactionId = message.getValue('transaction');
     log.debug("transactionId", transactionId)
+
     if (!transactionId) return;
+
     var transactionType = search.lookupFields({
       type: 'transaction',
       id: transactionId,
       columns: ['recordtype']
     }).recordtype;
     log.debug("transactionType", transactionType)
-
-    // Obtener ID del archivo adjunto
-    if (!fileId) return;
-    var fileType = search.lookupFields({
-      type: 'file',
-      id: fileId,
-      columns: ['recordtype']
-    }).recordtype;
-    log.debug("fileType", fileType)
-    try {
-      // Cargar el archivo
-      var originalFile = file.load({ id: fileId });
-
-      // (Opcional) Copiar el archivo al File Cabinet
-      var copiedFile = file.create({
-        name: originalFile.name,
-        fileType: originalFile.fileType,
-        contents: originalFile.getContents(),
-        folder: 1194715  // <- Cambiar por ID real de tu carpeta destino
+    if (transactionType !== PURCHASE_ORDER_TYPE) return; // Si no es una PO, salir
+    
+    log.debug("Es una PO, se procede")
+    for (var i = 0; i < mediaItemCount; i++) {
+      var fileId = message.getSublistValue({
+        sublistId: 'mediaitem',
+        fieldId: 'mediaitem',
+        line: 0 // puedes iterar si hay más de uno
       });
-      var newFileId = copiedFile.save();
-      log.debug("newFileId", newFileId)
-
-      // Adjuntar el archivo a la Purchase Order
-      var poRecord = record.attach({
-        record: {
-          type: fileType,
-          id: newFileId
-        },
-        to: {
-          type: transactionType,
-          id: transactionId
-        }
+      var itemDisplay = message.getSublistValue({
+        sublistId: 'mediaitem',
+        fieldId: 'mediaitem_display',
+        line: 0 // puedes iterar si hay más de uno
       });
+      var fileType = search.lookupFields({
+        type: 'file',
+        id: fileId,
+        columns: ['filetype']
+      }).filetype;
 
-      log.audit('Archivo adjuntado correctamente a la PO', 'Archivo ID: ' + newFileId);
-    } catch (e) {
-      log.error('Error en script de mensaje', e.toString());
+      files.push({
+        file_id: fileId, 
+        file_name: itemDisplay, 
+        file_type: fileType[0].value
+      })
     }
+    
+    log.debug("files to attach", files)
+    var payload = {
+      po_id: transactionId,
+      message_id: messageId,
+      files: files
+    }
+    log.debug("Payload to send", payload)
   }
 
   return {

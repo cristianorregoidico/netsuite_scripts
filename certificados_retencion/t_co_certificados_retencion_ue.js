@@ -21,8 +21,8 @@ define(['N/task', 'N/runtime', 'N/redirect'], function (task, runtime, redirect)
         try {
             if (context.type === 'create' || context.type === 'copy') {
                 redirect.toSuitelet({
-                    scriptId: 'customscript_co_certificado_reten_ss',
-                    deploymentId: 'customdeploy_co_certificado_reten_ss',
+                    scriptId: 'customscript_co_certificado_reten_ss_t',
+                    deploymentId: 'customdeploy_co_certificado_reten_ss_t',
                 });
             } else if (context.type === 'view') {
                 context.form.removeButton('edit');
@@ -40,9 +40,9 @@ define(['N/task', 'N/runtime', 'N/redirect'], function (task, runtime, redirect)
             if (runtime.executionContext === runtime.ContextType.SUITELET) {
                 var mrTask = task.create({
                     taskType: task.TaskType.MAP_REDUCE,
-                    scriptId: 'customscript_co_certificado_reten_mr',
-                    deploymentId: 'customdeploy_co_certificado_reten_mr',
-                    params: { 'custscript_co_id_registro_cert_reten': newRecord.id }
+                    scriptId: 'customscript_co_certificado_reten_mr_t',
+                    deploymentId: 'customdeploy_co_certificado_reten_mr_t',
+                    params: { 'custscript_co_id_registro_cert_reten_t': newRecord.id }
                 });
                 log.debug('IDREGISTRO', newRecord.id);
                 mrTask.submit();

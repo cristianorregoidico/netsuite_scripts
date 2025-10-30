@@ -1,0 +1,316 @@
+<?xml version="1.0"?>
+<!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd">
+<pdf>
+<head>
+	<link name="NotoSans" type="font" subtype="truetype" src="${nsfont.NotoSans_Regular}" src-bold="${nsfont.NotoSans_Bold}" src-italic="${nsfont.NotoSans_Italic}" src-bolditalic="${nsfont.NotoSans_BoldItalic}" bytes="2" />
+	<#if .locale == "zh_CN">
+		<link name="NotoSansCJKsc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKsc_Regular}" src-bold="${nsfont.NotoSansCJKsc_Bold}" bytes="2" />
+	<#elseif .locale == "zh_TW">
+		<link name="NotoSansCJKtc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKtc_Regular}" src-bold="${nsfont.NotoSansCJKtc_Bold}" bytes="2" />
+	<#elseif .locale == "ja_JP">
+		<link name="NotoSansCJKjp" type="font" subtype="opentype" src="${nsfont.NotoSansCJKjp_Regular}" src-bold="${nsfont.NotoSansCJKjp_Bold}" bytes="2" />
+	<#elseif .locale == "ko_KR">
+		<link name="NotoSansCJKkr" type="font" subtype="opentype" src="${nsfont.NotoSansCJKkr_Regular}" src-bold="${nsfont.NotoSansCJKkr_Bold}" bytes="2" />
+	<#elseif .locale == "th_TH">
+		<link name="NotoSansThai" type="font" subtype="opentype" src="${nsfont.NotoSansThai_Regular}" src-bold="${nsfont.NotoSansThai_Bold}" bytes="2" />
+	</#if>
+    <macrolist>
+        <macro id="nlheader">
+            <table class="header" style="width: 100%; font-size: 10pt; margin-top: -40px;">
+                <tr>
+                    <td  rowspan="3" style="padding-top:50px;"><#if companyInformation.logoUrl?length != 0> <@filecabinet nstype="image" style="float: left; margin: 7px; width: 220px; height: 70px;" src="${companyInformation.logoUrl}" /> </#if> 
+                    </td>
+                    <#if record.custbody_transaccion_brazil>
+                        <td align="center">
+                            <img src="https://11012044-sb1.app.netsuite.com/core/media/media.nl?id=1434321&c=11012044_SB1&h=-AyntbAJVIMQ3fb06tS92xij3oyhIpNyDf72wo5XIWRjYGPe" width="90" height="90"/>
+                    </td>
+                    </#if>
+                    
+                    <td align="left" style="padding-top:60px;"><span class="title">${record@title}</span></td>
+                </tr>
+            </table>
+        </macro>
+        <macro id="nlfooter">
+            <table class="footer">
+                <tr>
+                    <td align="center">
+                        <pagenumber/> of <totalpages/>
+                    </td>
+                </tr>
+            </table>
+        </macro>
+    </macrolist>
+    <style>
+		* {
+		<#if .locale == "zh_CN">
+			font-family: NotoSans, NotoSansCJKsc, sans-serif;
+		<#elseif .locale == "zh_TW">
+			font-family: NotoSans, NotoSansCJKtc, sans-serif;
+		<#elseif .locale == "ja_JP">
+			font-family: NotoSans, NotoSansCJKjp, sans-serif;
+		<#elseif .locale == "ko_KR">
+			font-family: NotoSans, NotoSansCJKkr, sans-serif;
+		<#elseif .locale == "th_TH">
+			font-family: NotoSans, NotoSansThai, sans-serif;
+		<#else>
+			font-family: NotoSans, sans-serif;
+		</#if>
+		}
+		table {
+			font-size: 9pt;
+			table-layout: fixed;
+		}
+        th {
+            font-weight: bold;
+            font-size: 8pt;
+            vertical-align: middle;
+            padding: 3px;
+            background-color: #e3e3e3;
+            color: #333333;
+        }
+        td {
+            padding: 4px 6px;
+        }
+		td p { align:left }
+        b {
+            font-weight: bold;
+            color: #333333;
+        }
+        table.header td {
+            padding: 0;
+            font-size: 10pt;
+        }
+        table.footer td {
+            padding: 0;
+            font-size: 8pt;
+            width: 100%;
+        }
+        table.itemtable {
+            border: 1px solid #d3d3d3;
+            border-collapse: collapse;
+        }
+        table.itemtable th {
+            border: 1px solid #d3d3d3;
+            border-collapse: collapse;
+        }
+        table.body td {
+            padding-top: 2px;
+        }
+        td.addressheader {
+            font-size: 8pt;
+            font-weight: bold;
+            padding-top: 6px;
+            padding-bottom: 2px;
+        }
+        td.address {
+            padding-top: 0;
+        }
+        span.title {
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        span.number {
+            font-size: 16pt;
+        }
+        span.itemname {
+            font-weight: bold;
+            line-height: 150%;
+        }
+        div.returnform {
+            width: 100%;
+            /* To ensure minimal height of return form */
+            height: 200pt;
+            page-break-inside: avoid;
+            page-break-after: avoid;
+        }
+        hr {
+            border-top: 1px dashed #d3d3d3;
+            width: 100%;
+            color: #ffffff;
+            background-color: #ffffff;
+            height: 1px;
+        }
+        tr.itemrow td {
+            border-left: 1px solid #e3e3e3;
+            border-right: 1px solid #e3e3e3;
+            font-size: 8pt;
+        }
+        div.weightsummary {
+            margin-top: 10px;
+            font-size: 9pt;
+            width: 100%;
+            text-align: right;
+        }
+        div.weightsummary p {
+            text-align: right;
+            width: 100%;
+            margin: 4px 0;
+        }
+        
+    </style>
+</head>
+<body header="nlheader" header-height="10%" footer="nlfooter" footer-height="20pt" padding="0.5in 0.5in 0.5in 0.5in" size="Letter">
+<table style="margin-top: 5px; width: 100%; font-size: 11px;" cellspacing="1" cellpadding="1">
+<tr>
+<td><strong class="nameandaddress">${companyInformation.companyName}</strong><br />
+${companyInformation.addressText}<br />
+Tax ID # 65-0000396<br />
+</td>
+<td>
+  <strong>${salesorder.trandate@label}</strong>&nbsp;${salesorder.trandate}<br />
+  <strong>${salesorder.tranid@label}</strong>&nbsp;${salesorder.tranid}<br />
+  <strong>${salesorder.shipdate@label}</strong>&nbsp;${salesorder.shipdate}<br />
+  <strong>${salesorder.shipmethod@label}</strong>&nbsp;${salesorder.shipmethod}<br />
+  <strong>${salesorder.otherrefnum@label}&nbsp;</strong>${salesorder.otherrefnum}<br />
+  <strong>${salesorder.terms@label}</strong>&nbsp;${salesorder.terms}<br />
+  <strong>${salesorder.salesrep@label}</strong>&nbsp;${salesorder.salesrep}<br />
+  
+
+  <!-- <br /> -->
+  <!-- <strong>${record.shipaddress@label}&nbsp;</strong>${record.shipaddress} -->
+  
+  </td>
+</tr>
+</table>
+<table style="width: 100%; margin-top: 11px; font-size: 11px;">
+<tr>
+<td class="addressheader" colspan="3"><strong style="font-size: 11px;">${salesorder.billaddress@label}</strong></td>
+<td class="addressheader" colspan="3"><strong style="font-size: 11px;">${salesorder.shipaddress@label}</strong></td>
+</tr>
+<tr>
+<td class="address" colspan="3" rowspan="2">${salesorder.billaddress}</td>
+<td class="address" colspan="3" rowspan="2">${salesorder.shipaddress}</td>
+</tr>
+</table>
+
+<table style="width: 100%; margin-top: 11px; font-size: 11px;">
+<tr>
+<td><strong>NOTES/PACKAGES </strong><br/>
+<span>${salesorder.custbody_evol_shipment_package}</span>
+</td>
+</tr>
+</table>
+
+    <#if salesorder.item?has_content>
+    <table class="itemtable" style="width: 100%; margin-top: 20px; min-height:400px">
+        <thead>
+        <tr>
+            <th colspan="1" align="center">#</th>
+            <th colspan="6">${salesorder.item[0].item@label}</th>
+            <th colspan="8">${salesorder.item[0].description@label}</th>
+            <th align="center" colspan="3">${salesorder.item[0].quantityordered@label}</th>
+            <th align="center" colspan="3">${salesorder.item[0].quantity@label}</th>
+            <th align="center" colspan="4">${salesorder.item[0].quantityremaining@label}</th>
+            <th colspan="2" align="center">${salesorder.item[0].units@label}</th>
+            <#if record.custbody_transaccion_brazil>
+                <th colspan="4" align="center">Unit Weight</th>
+            </#if>
+        
+        </tr>
+        </thead>
+        <#assign totalQuantity = 0>
+        <#list salesorder.item as tranline>
+            <tr class="itemrow">
+            <td colspan="1" align="center"><span class="itemname">${tranline.custcol_evol_line_number}</span><br /></td>
+                <td colspan="6"><span class="itemname">${tranline.item}</span><br /></td>
+                <td colspan="8">${tranline.description}</td>
+                <td align="center" colspan="3">${tranline.quantityordered}</td>
+                <td align="center" colspan="3">${tranline.quantity}</td>
+                <td align="center" colspan="4">${tranline.quantityremaining}</td>
+                <td align="center" colspan="2">${tranline.units}</td>
+                <#if record.custbody_transaccion_brazil>
+                    <td align="center" colspan="4">
+                        <#if record.item[tranline_index]?? && record.item[tranline_index].custcol_unit_weight?? && record.item[tranline_index].custcol_unit_weight?has_content>
+                            ${(record.item[tranline_index].custcol_unit_weight* 0.45359237)?string["0.##"]}
+                        <#else>
+                            0
+                        </#if>
+                    </td>
+                </#if>
+                
+            </tr>
+            <#if record.item[tranline_index]?? && record.item[tranline_index].custcol_unit_weight?? && record.item[tranline_index].custcol_unit_weight?has_content>
+                <#assign totalQuantity = totalQuantity + record.item[tranline_index].custcol_unit_weight>
+            </#if>
+        </#list>
+    </table>
+        <#if record.custbody_transaccion_brazil>
+<table style="width: 100%; margin-top: 11px;">
+    <tr>
+        <td colspan="3">&nbsp;</td>
+        <td align="right"><strong>Net Weight (kg):</strong></td>
+        <td align="right">
+            <#if totalQuantity??>
+                ${(totalQuantity * 0.45359237)?string["0.##"]}
+            <#else>
+                0
+            </#if>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">&nbsp;</td>
+        <td align="right"><strong>Gross Weight (kg):</strong></td>
+        <td align="right">
+            <#if record.custbody_packing_gross_weight?? && record.custbody_packing_gross_weight?has_content>
+                ${(record.custbody_packing_gross_weight?number * 0.45359237)?string["0.##"]}
+            <#else>
+                0
+            </#if>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">&nbsp;</td>
+        <td align="right"><strong>Total Weight (kg):</strong></td>
+        <td align="right">
+            <#if record.custbody_packing_gross_weight?? && record.custbody_packing_gross_weight?has_content>
+                ${(record.custbody_packing_gross_weight?number * 0.45359237)?string["0.##"]}
+            <#else>
+                0
+            </#if>
+        </td>
+    </tr>
+</table>
+        </#if>
+    
+    </#if>
+    <#if preferences.RETURNFORM && returnForm??>
+    <hr />
+    <div class="returnform">
+        <table style="width: 100%; margin-top: 10px;">
+            <tr>
+                <td><span class="nameandaddress">${companyInformation.companyName}</span></td>
+                <td align="right"><span class="number">${returnForm@title}</span></td>
+            </tr>
+        </table>
+        <table style="width: 100%; margin-top: 10px;">
+            <tr>
+                <td class="addressheader" colspan="4">${returnForm.returnAddress}</td>
+                <th>${returnForm.rmaNum}</th>
+                <th colspan="2">${returnForm.customerName}</th>
+                <th>${salesorder.tranid@label}</th>
+            </tr>
+            <tr>
+                <td class="address" colspan="4" rowspan="2">&nbsp;</td>
+                <td>&nbsp;</td>
+                <td colspan="2">${salesorder.entity}</td>
+                <td>${salesorder.tranid}</td>
+            </tr>
+            <tr>
+                <td colspan="4">&nbsp;</td>
+            </tr>
+        </table>
+        <table class="itemtable" style="width: 100%; margin-top: 10px;">
+            <thead>
+            <tr>
+                <th colspan="2">${returnForm.item}</th>
+                <th colspan="1">${returnForm.quantity}</th>
+                <th colspan="5">${returnForm.reason}</th>
+            </tr>
+            </thead>
+            <tr>
+                <td colspan="8">&nbsp;</td>
+            </tr>
+        </table>
+    </div></#if>
+</body>
+</pdf>

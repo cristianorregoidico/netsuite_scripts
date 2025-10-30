@@ -8,7 +8,7 @@ define(['N/https', 'N/record', 'N/log'], function (https, record, log) {
 
     function afterSubmit(context) {
         try {
-            if (context.type !== context.UserEventType.CREATE) return;
+            if (context.type !== context.UserEventType.CREATE && context.type !== context.UserEventType.EDIT) return;
 
             var soRecord = context.newRecord;
             var soId = soRecord.id;
