@@ -41,7 +41,7 @@ define(['N/log', 'N/file', 'N/record', 'N/search'],
 				var document = options.document;
 				trace = 'Actividad 2';
 				var vendorObj = getVendor(document.entity);
-
+				console.log("hola");
 				var primeraParte = {
 					"UBLVersionID": [
 						{
@@ -1114,7 +1114,7 @@ define(['N/log', 'N/file', 'N/record', 'N/search'],
 													{
 														"Line": [
 															{
-																"_": document.direccionEntrega.replace(/\n/g, " ")
+																"_": document.direccionEntrega
 															}
 														]
 													}
@@ -1352,7 +1352,7 @@ define(['N/log', 'N/file', 'N/record', 'N/search'],
 													{
 														"Line": [
 															{
-																"_": document.puntoLlegada
+																"_": document.direccionEntrega
 															}
 														]
 													}
@@ -3922,7 +3922,7 @@ define(['N/log', 'N/file', 'N/record', 'N/search'],
 						}
 						asignature.PaymentTerms[0].Amount = [
 							{
-								"_": parseFloat(paymentTermAmount).toFixed(2),
+								"_": (parseFloat(paymentTermAmount) - (parseFloat(totalVentaAplly) * 0.03)).toFixed(2),
 								"currencyID": document.currency
 							}
 						];
@@ -3939,7 +3939,7 @@ define(['N/log', 'N/file', 'N/record', 'N/search'],
 							],
 							"Amount": [
 								{
-									"_": parseFloat(paymentTermAmount).toFixed(2),
+									"_": (parseFloat(paymentTermAmount) - (parseFloat(totalVentaAplly) * 0.03)).toFixed(2),
 									"currencyID": document.currency
 								}
 							],

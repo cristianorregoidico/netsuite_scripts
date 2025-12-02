@@ -650,7 +650,8 @@ define(['N/log', 'N/search', 'N/record', 'N/file'],
 				//search.createColumn({ name: "custbody_sj_motiv_devolucion", label: "T_motivoDevolucion" }),
 				search.createColumn({ name: "custbody_pe_fecha_venci_ref", label: "fechaVencRef" }),
 				search.createColumn({ name: "custbody_pe_condicion_ref", label: "T_condicionRef" }),
-				search.createColumn({ name: "custbody_pe_forma_pago_ref", label: "T_formaPagoRef" })
+				search.createColumn({ name: "custbody_pe_forma_pago_ref", label: "T_formaPagoRef" }),
+				search.createColumn({ name: "custbody16", label: "additionalNotes" })
 			];
 			return columns;
 		}

@@ -486,7 +486,8 @@ define(['N/search', 'N/record', 'N/runtime', 'N/log', 'N/file', 'N/task', "N/con
                             }
                             const column51 = result.getValue(searchLoad.columns[50]);
                             const column52 = result.getText(searchLoad.columns[51]);
-                            const column53 = result.getText(searchLoad.columns[52]);
+                            const column53 = result.getValue(searchLoad.columns[52]);
+                            log.debug({ title: 'column53', details: column53 });
                             json.push({
                                 c1_periodo: column01,
                                 c2_cuo: column02,
@@ -716,7 +717,7 @@ define(['N/search', 'N/record', 'N/runtime', 'N/log', 'N/file', 'N/task', "N/con
                                 }
                                 const column51 = searchResult[j].getValue(searchLoad.columns[50]);
                                 const column52 = searchResult[j].getText(searchLoad.columns[51]);
-                                const column53 = searchResult[j].getText(searchLoad.columns[52]);
+                                const column53 = searchResult[j].getValue(searchLoad.columns[52]);
                                 json.push({
                                     c1_periodo: column01,
                                     c2_cuo: column02,
@@ -787,9 +788,23 @@ define(['N/search', 'N/record', 'N/runtime', 'N/log', 'N/file', 'N/task', "N/con
             }
         } 
 
-        const structureBody = (searchResult) => {
+        const structureBody = (searchResult, txt = false) => {
             let contentReport = '';
             try {
+                if (txt){
+                    for (let i in searchResult) {
+                        contentReport =
+                        contentReport + searchResult[i].c52 + '|' + searchResult[i].c53 + '|' + searchResult[i].c1_periodo + '|' + '' + '|'  + searchResult[i].c4_fecha_emision_comprobante_pago_doc + '|' + searchResult[i].c5_fecha_vencimiento_o_fecha_pago + '|' +
+                        searchResult[i].c6_tipo_comprobante_pago_o_documento + '|' + searchResult[i].c7_serie_comprobante_pago_o_documento + '|' + searchResult[i].c8_nro_comprobante_pago_o_documento + '|' + searchResult[i].c9_en_caso_operaciones_diarias_o_credito_fiscal + '|' + searchResult[i].c10_tipo_documento_identidad_cliente + '|' +
+                        searchResult[i].c11_numero_ruc_cliente_o_nro_doc + '|' + searchResult[i].c12_nombres_o_razon_social + '|' + searchResult[i].c13_x_pe + '|' + searchResult[i].c14_s_pe + '|' + searchResult[i].c15_desc + '|' +
+                        searchResult[i].c16_igv + '|' + searchResult[i].c17_igv_descuento_pe + '|' + searchResult[i].c18_e_pe + '|' + searchResult[i].c19_i_pe + '|' + searchResult[i].c20_sun_pe + '|' +
+                        searchResult[i].c21_iun_pe + '|' + searchResult[i].c22_inaf_pe + '|' + searchResult[i].c23_icbp + '|' + searchResult[i].c24_otros + '|' + searchResult[i].c25_total + '|' +
+                        searchResult[i].c26_mon + '|' + searchResult[i].c27_tc + '|' + searchResult[i].c28_fecha_doc_ref + '|' + searchResult[i].c29_td_doc_ref + '|' + searchResult[i].c30_serie_doc_ref + '|' +
+                        searchResult[i].c31_num_doc_ref + '|' + searchResult[i].c32_identificador_contrato + '|\n';
+                    }
+                    log.debug("structureBody contentReport", contentReport);
+                    return contentReport;
+                }
                 for (let i in searchResult) {
                     contentReport =
                     contentReport + searchResult[i].c1_periodo + '|' + searchResult[i].c2_cuo + '|' + searchResult[i].c3_correlativo + '|' + searchResult[i].c4_fecha_emision_comprobante_pago_doc + '|' + searchResult[i].c5_fecha_vencimiento_o_fecha_pago + '|' +
@@ -844,6 +859,7 @@ define(['N/search', 'N/record', 'N/runtime', 'N/log', 'N/file', 'N/task', "N/con
                     structuregbody = structuregbody.replace(/[|]/gi, ',');
                     typeformat = file.Type.CSV;
                 } else if (params.filterFormat == 'TXT') {
+                    structuregbody = structureBody(transactionJSON, true)
                     nameReportGenerated = nameReportGenerated + '.txt';
                     typeformat = file.Type.PLAINTEXT;
                 } else if (params.filterFormat == 'PDF') {
