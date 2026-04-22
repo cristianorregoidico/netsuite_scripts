@@ -16,9 +16,11 @@ define(['N/runtime', 'N/search', 'N/record'],
         // --- Variables ---
         const LOGISTICS_EMAIL = 'logistics@idico.com';
         const PURCHASE_ORDER_PATH = 'purchord'; // Referer path for Purchase Order
+        const SALES_ORDER_PATH = 'salesord'; // Referer path for Purchase Order
         const OTHER_RECIPIENTS_SUBLIST_ID = 'otherrecipientslist';
         const EMAIL_FIELD_ID = 'email';
         const CC_FIELD_ID = 'cc';
+        const CUSTOMER_ADD_EMAILS = ['cristianorrego@idico.com', 'b@idico.com', 'c@idico.com']
         let linkedPurchaseOrder = null;
 
         /**
@@ -126,6 +128,64 @@ define(['N/runtime', 'N/search', 'N/record'],
             }
         }
 
+                /**
+         * Retorna el array de correos adicionales del cliente.
+         * @param {number|string} salesOrderId - El ID interno de la Sales Order.
+         * @returns {string[]|null} El email del Sales Rep, o null si no se encuentra o hay un error.
+         */
+        function getCustomerAdditionalEmails(salesOrderId) {
+            try {
+                if (!salesOrderId) {
+                    log.debug('getCustomerAdditionalEmails', 'Sales Order ID is null or empty.');
+                    return null;
+                }
+
+                // Cargar la Sales Order
+                const salesOrder = record.load({
+                    type: record.Type.SALES_ORDER,
+                    id: salesOrderId,
+                    isDynamic: false
+                });
+                // Corrección de string template
+                log.debug('getCustomerAdditionalEmails', 'Sales Order ' + salesOrderId + ' loaded successfully.');
+
+                // Obtener el ID del Sales Rep (campo 'salesrep')
+                const customerId = salesOrder.getValue({ fieldId: 'entity' });
+                // Corrección de string template
+                log.debug('customerId', 'Sales Rep ID for SO ' + salesOrderId + ': ' + customerId);
+
+                if (customerId) {
+                    // Cargar el registro del empleado (Sales Rep es un tipo de empleado)
+                    log.debug('customerId', 'Loading customer record for ID: ' + customerId);
+                    const entityRecord = record.load({
+                        type: record.Type.CUSTOMER,
+                        id: customerId,
+                        isDynamic: false
+                    });
+                    const customerAddEmailString = entityRecord.getValue({ fieldId: 'custentity_additional_emails' });
+                    // Corrección de string template
+                    log.debug('customerAddEmailString', 'Email for Sales Rep ' + customerId + ': ' + customerAddEmailString);
+                    const additionalCustomerEmails = customerAddEmailString.split(';').map(e => e.trim()).filter(e => e !== '');
+                    log.debug('additionalCustomerEmails', additionalCustomerEmails);
+                    return additionalCustomerEmails;
+                    // if (employeeEmail && employeeEmail.trim() !== '') {
+                    //     return employeeEmail;
+                    // } else {
+                    //     // Corrección de string template
+                    //     log.debug('getSalesRepEmailFromSalesOrder', 'Email for Sales Rep ' + salesRepId + ' is empty.');
+                    //     return null;
+                    //}
+                } else {
+                    log.debug('getCustomerAdditionalEmails', 'No Sales Rep found on Sales Order ' + salesOrderId + '.');
+                    return [];
+                }
+            } catch (e) {
+                // Corrección de string template
+                log.error('getCustomerAdditionalEmails Error', 'Failed to get Sales Rep email for SO ' + salesOrderId + '. Error: ' + e.message + ', Stack: ' + e.stack);
+                return null;
+            }
+        }
+
         /**
          * Defines the function definition that is executed before record is loaded.
          * @param {Object} scriptContext
@@ -141,7 +201,10 @@ define(['N/runtime', 'N/search', 'N/record'],
             const transactionType = record.Type.PURCHASE_ORDER;
             const actualRecipient = msgRecord.getValue({ fieldId: 'recipientemail' })
             log.debug('recipientemail', actualRecipient)
+            let otherRecipientsLineCount = msgRecord.getLineCount({ sublistId: OTHER_RECIPIENTS_SUBLIST_ID });
+            log.debug('Other Recipients Line Count', otherRecipientsLineCount);
 
+           
             // Para entornos de producción, considera envolver los logs en una condición de entorno
             // if (runtime.env === 'SANDBOX' || runtime.env === 'DEVELOPMENT') {
             //     log.debug('Request Headers', request?.headers?.referer);
@@ -163,6 +226,20 @@ define(['N/runtime', 'N/search', 'N/record'],
 
             log.debug("transactionId", transactionId)
 
+             // Añadir correos adicionales predefinidos de clientes
+            if (referer.includes(SALES_ORDER_PATH) && isEmail) {
+                log.debug("Ingresando en SO IF", "Referer includes " + SALES_ORDER_PATH);
+                log.debug("CUSTOMER_ADD_EMAILS", CUSTOMER_ADD_EMAILS);
+                const CUSTOMER_ADDITIONAL_EMAILS = getCustomerAdditionalEmails(transactionId)
+                CUSTOMER_ADDITIONAL_EMAILS.forEach((customerEmail) => {
+                    const emailAlreadyAdded = emailExistsInRecipients(msgRecord, customerEmail);
+                    log.debug('Customer Email Already Added?', emailAlreadyAdded);
+                    if (!emailAlreadyAdded) {
+                        addRecipientToSublist(msgRecord, customerEmail, otherRecipientsLineCount);
+                        otherRecipientsLineCount++;
+                    }
+                });
+            }
             // Guard Clause: Solo procede si el referer incluye "purchord"
             if (!referer.includes(PURCHASE_ORDER_PATH) || !isEmail) {
                 log.debug('Skipping Script', `Referer does not include "${PURCHASE_ORDER_PATH}". Referer: ${referer}`);
@@ -200,9 +277,9 @@ define(['N/runtime', 'N/search', 'N/record'],
             log.debug('Current User Email', currentUserEmail);
             log.debug('Target Logistics Email', LOGISTICS_EMAIL);
 
-            let otherRecipientsLineCount = msgRecord.getLineCount({ sublistId: OTHER_RECIPIENTS_SUBLIST_ID });
-            log.debug('Other Recipients Line Count', otherRecipientsLineCount);
+            
 
+            
             // Verificar si el correo de logística ya está en la lista de destinatarios
             const logisticsEmailAlreadyAdded = emailExistsInRecipients(msgRecord, LOGISTICS_EMAIL);
             log.debug('Logistics Email Already Added?', logisticsEmailAlreadyAdded);

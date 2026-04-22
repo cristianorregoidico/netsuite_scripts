@@ -1,42 +1,73 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.1
  * @NScriptType UserEventScript
+ * @Author Franco León - Cristian Orrego - 01/2026
+ * @description En VIEW de un registro con custbody_approval_state = Unapproved (3) y usuario con rol 1009, oculta los mensajes de comunicaciones en la UI.
  */
-define(['N/log', 'N/ui/serverWidget'], function(log, serverWidget) {
+define(['N/runtime'], (runtime) => {
 
-    function beforeLoad(context) {
-        if (context.type === context.UserEventType.VIEW) {
-            try {
-                var form = context.form;
-                
-                // Opción 1: Ocultar el subtab completo de 'Communications'
-                // Necesitas el ID del subtab. Frecuentemente es 'communications' o similar.
-                // Tendrías que inspeccionar el código fuente para el ID exacto del subtab.
-                // Si el ID es 'communications', el código sería:
-                var communicationTab = form.getSublist({ id: 'communications' }); // o form.getTab({ id: 'communications' }); si es un tab de nivel superior
-                if (communicationTab) {
-                    communicationTab.isHidden = true;
-                    log.debug('Subtab Communications ocultado', 'Modo: VIEW');
-                } else {
-                    log.debug('Subtab Communications no encontrado');
-                }
+  function beforeLoad(context) {
 
-                // Opción 2 (menos probable para un botón interno): Deshabilitar un botón por ID si NetSuite lo expone
-                // Esto solo funciona si NetSuite expone el botón específico en la API del formulario.
-                // Es muy poco probable que el botón de email sea directamente accesible así.
-                // var emailButton = form.getButton({ id: 'tbl_newmessage' }); // No funcionará con IDs HTML directos.
-                // if (emailButton) {
-                //     emailButton.isHidden = true; // O emailButton.isDisabled = true;
-                //     log.debug('Botón de email ocultado/deshabilitado');
-                // }
+    // SOLO VIEW
+    if (context.type !== context.UserEventType.VIEW) return;
 
-            } catch (e) {
-                log.error('Error en beforeLoad (User Event):', e);
-            }
-        }
-    }
+    const user = runtime.getCurrentUser();
+    if (Number(user.role) !== 1009) return;
 
-    return {
-        beforeLoad: beforeLoad
-    };
+    const rec = context.newRecord;
+    const approvalValue = String(rec.getValue({ fieldId: 'custbody_approval_state' }) || '');
+
+    // Unapproved = internal id 3
+    if (approvalValue !== '3') return;
+
+    // Inyectamos JS/CSS
+    const html = `
+      <script>
+        (function() {
+          function hideMessages() {
+            var labels = ['Messages', 'Mensajes'];
+
+            document.querySelectorAll('a, span, div, li').forEach(function(node) {
+              var t = (node.innerText || '').trim();
+              if (labels.indexOf(t) !== -1) {
+                var container =
+                  node.closest('li') ||
+                  node.closest('td') ||
+                  node.closest('div') ||
+                  node;
+                if (container) container.style.display = 'none';
+              }
+            });
+
+            var selectors = [
+              '[id^="messages"]',
+              '[id*="messages"]',
+              '[aria-label="Messages"]',
+              '[aria-label="Mensajes"]',
+              '[data-title="Messages"]',
+              '[data-title="Mensajes"]'
+            ];
+
+            selectors.forEach(function(sel) {
+              document.querySelectorAll(sel).forEach(function(el) {
+                el.style.display = 'none';
+              });
+            });
+          }
+
+          setTimeout(hideMessages, 100);
+          setTimeout(hideMessages, 500);
+          setTimeout(hideMessages, 1500);
+        })();
+      </script>
+    `;
+
+    context.form.addField({
+      id: 'custpage_hide_messages_js',
+      type: 'inlinehtml',
+      label: 'Hide Messages'
+    }).defaultValue = html;
+  }
+
+  return { beforeLoad };
 });
