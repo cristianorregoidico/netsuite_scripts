@@ -6,13 +6,23 @@
 define(['N/email', 'N/file', 'N/record', 'N/runtime', 'N/log', 'N/error'],
 (email, file, record, runtime, log, nsError) => {
 
+  const normalizeEmailList = (value) => {
+    if (!value) return [];
+
+    const values = Array.isArray(value) ? value : String(value).split(/[;,]/);
+
+    return values
+      .map((emailAddress) => String(emailAddress).trim())
+      .filter(Boolean);
+  };
+
   const post = (request) => {
     try {
       const {
         transactionId,
         author,
         recipients,
-        cc,
+        bcc,
         subject,
         body,
         fileIds = []
@@ -34,7 +44,7 @@ define(['N/email', 'N/file', 'N/record', 'N/runtime', 'N/log', 'N/error'],
       log.debug('Sending email', {
         authorId,
         recipients,
-        cc,
+        bcc,
         subject,
         transactionId,
         attachmentsCount: attachments.length
@@ -50,8 +60,9 @@ define(['N/email', 'N/file', 'N/record', 'N/runtime', 'N/log', 'N/error'],
         relatedRecords: { transactionId: Number(transactionId) }
       };
 
-      if (typeof cc === 'string' && cc.trim()) {
-        emailOptions.cc = cc.trim();
+      const bccRecipients = normalizeEmailList(bcc);
+      if (bccRecipients.length) {
+        emailOptions.bcc = bccRecipients;
       }
 
       email.send(emailOptions);
@@ -60,7 +71,7 @@ define(['N/email', 'N/file', 'N/record', 'N/runtime', 'N/log', 'N/error'],
       return {
         ok: true,
         attachedToTransactionId: Number(transactionId),
-        ccSent: Boolean(emailOptions.cc),
+        bccSent: Boolean(emailOptions.bcc && emailOptions.bcc.length),
         attachmentsCount: attachments.length
       };
 
